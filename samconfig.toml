@@ -1,0 +1,11 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "lol-api"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-10m10nasyur0c"
+s3_prefix = "lol-api"
+region = "us-east-2"
+profile = "serverless-admin"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"

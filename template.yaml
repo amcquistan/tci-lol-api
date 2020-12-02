@@ -1,0 +1,86 @@
+# template.yaml
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  This is a SAM template for lol-api which is a Serverless API for 
+  composing and managing Lots of Lists.
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  LotsOfListsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: flask_api/
+      Handler: app.app
+      Runtime: python3.8
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LotsOfListsTable
+          REGION_NAME: !Ref AWS::Region
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LotsOfListsTable
+      Events:
+        FetchLists:
+          Type: Api
+          Properties:
+            Path: /lists
+            Method: get
+        CreateList:
+          Type: Api
+          Properties:
+            Path: /lists
+            Method: post
+        FetchList:
+          Type: Api
+          Properties:
+            Path: /lists/{id}
+            Method: get
+        UpdateList:
+          Type: Api
+          Properties:
+            Path: /lists/{id}
+            Method: put
+        DeleteList:
+          Type: Api
+          Properties:
+            Path: /lists/{id}
+            Method: delete
+
+  LotsOfListsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: lots-of-lists
+      AttributeDefinitions:
+        - AttributeName: listId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: listId
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  LotsOfListsApi:
+    Description: "API Gateway endpoint URL for Prod stage for Lots Of Lists function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/lists"
+  LotsOfListsFunction:
+    Description: "Lots Of Lists Lambda Function ARN"
+    Value: !GetAtt LotsOfListsFunction.Arn
+  LotsOfListsFunctionIamRole:
+    Description: "Implicit IAM Role created for Lots Of Lists function"
+    Value: !GetAtt LotsOfListsFunctionRole.Arn
