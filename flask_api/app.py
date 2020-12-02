@@ -6,7 +6,6 @@ import boto3
 from boto3.dynamodb.conditions import Key
 
 from flask import request, jsonify
-from flask import json
 from flask_lambda import FlaskLambda
 
 REGION = os.environ['REGION_NAME']
