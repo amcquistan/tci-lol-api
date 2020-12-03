@@ -11,6 +11,20 @@ Globals:
   Function:
     Timeout: 10
 
+Parameters:
+  ExecEnv:
+    Type: String
+    AllowedValues:
+      - local
+      - dev
+      - stage
+      - prod
+    Default: prod
+  LotsOfListsTableName:
+    Type: String
+    Default: lots-of-lists
+
+
 Resources:
   LotsOfListsFunction:
     Type: AWS::Serverless::Function
@@ -20,8 +34,9 @@ Resources:
       Runtime: python3.8
       Environment:
         Variables:
-          TABLE_NAME: !Ref LotsOfListsTable
+          TABLE_NAME: !Ref LotsOfListsTableName
           REGION_NAME: !Ref AWS::Region
+          EXEC_ENV: !Ref ExecEnv
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LotsOfListsTable
@@ -55,7 +70,7 @@ Resources:
   LotsOfListsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: lots-of-lists
+      TableName: !Ref LotsOfListsTableName
       AttributeDefinitions:
         - AttributeName: listId
           AttributeType: S

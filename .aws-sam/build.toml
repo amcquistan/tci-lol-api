@@ -5,6 +5,7 @@
 codeuri = "flask_api/"
 runtime = "python3.8"
 source_md5 = ""
+packagetype = "Zip"
 functions = ["LotsOfListsFunction"]
 
 [layer_build_definitions]
