@@ -8,14 +8,22 @@ from boto3.dynamodb.conditions import Key
 from flask import request, jsonify
 from flask_lambda import FlaskLambda
 
+EXEC_ENV = os.environ['EXEC_ENV']
 REGION = os.environ['REGION_NAME']
 TABLE_NAME = os.environ['TABLE_NAME']
 
+
 app = FlaskLambda(__name__)
 
-dynamodb = boto3.resource('dynamodb', region_name=REGION)
+if EXEC_ENV == 'local':
+    print('Configuring local dynamodb access')
+    dynamodb = boto3.resource('dynamodb', endpoint_url='http://dynamodb:8000')
+else:
+    dynamodb = boto3.resource('dynamodb', region_name=REGION)
+
 
 def db_table(table_name=TABLE_NAME):
+    print(f'!!! Getting dynamodb table {table_name}')
     return dynamodb.Table(table_name)
 
 
@@ -31,6 +39,10 @@ def fetch_lists():
         user_id = parse_user_id(request)
     except:
         return jsonify('Unauthorized'), 401
+
+    print('!!! Here are the existing tables')
+    for tbl in dynamodb.tables.all():
+        print(tbl)
 
     tbl_response = db_table().query(KeyConditionExpression=Key('userId').eq(user_id))
     return jsonify(tbl_response['Items'])
